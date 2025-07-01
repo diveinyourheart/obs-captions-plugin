@@ -4,7 +4,7 @@ project(obs_google_caption_plugin)
 set(CMAKE_CXX_STANDARD 17)
 set(VERSION_STRING "0.30")
 
-set(OBS_BUILD_DIR "" CACHE STRING "Path containing obs and obs-fronted-api libs")
+set(OBS_BUILD_DIR "${CMAKE_SOURCE_DIR}/build_macos" CACHE STRING "Path containing obs and obs-fronted-api libs" FORCE)
 set(OBS_DEPS_DIR "" CACHE STRING "Path to OBS deps and Qt deps")
 
 message("OBS_BUILD_DIR: ${OBS_BUILD_DIR}")
@@ -79,7 +79,7 @@ set(obs_google_caption_plugin_SOURCES
         src/CaptionPluginManager.cpp
         src/ui/CaptionDock.cpp
         src/ui/OpenCaptionSettingsWidget.cpp
-        )
+)
 
 set(obs_google_caption_plugin_HEADERS
         src/SourceAudioCaptureSession.h
@@ -93,7 +93,7 @@ set(obs_google_caption_plugin_HEADERS
         src/CaptionPluginManager.h
         src/ui/CaptionDock.h
         src/ui/OpenCaptionSettingsWidget.h
-        )
+)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -117,7 +117,7 @@ add_library(obs_google_caption_plugin MODULE
         ${obs_google_caption_plugin_HEADERS}
         ${obs_google_caption_plugin_SOURCES}
         ${obs_QRC_SOURCES}
-        )
+)
 
 if (WIN32 AND NOT BUILD_SHARED_LIBS)
     message(BUILD_SHARED_LIBS: setting win flags)
@@ -156,9 +156,7 @@ message("OBS_BUILD_DIR: ${OBS_BUILD_DIR}")
 #        ${OBS_BUILD_DIR}/lib
 #        ${OBS_BUILD_DIR}
 #        NO_DEFAULT_PATH
-#        )
-
-message("${OBS_BUILD_DIR}")
+#)
 
 find_package(libobs REQUIRED
         PATHS
@@ -174,7 +172,7 @@ message("using libOBS: ${libobs_DIR}")
 #        ${OBS_BUILD_DIR}
 #        ${OBS_BUILD_DIR}/lib
 #        NO_DEFAULT_PATH
-#        )
+#)
 
 find_package(obs-frontend-api REQUIRED
         CONFIG
