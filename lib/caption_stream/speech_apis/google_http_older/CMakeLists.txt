@@ -26,8 +26,6 @@ set(SPEECH_API_SOURCES
         )
 
 include_directories(${PLIBSYS_DIR}/src)
-include_directories(thridparty/concurrentqueue)
-include_directories(thridparty/json11)
 
 add_library(speech_api_stream STATIC
         ${SPEECH_API_SOURCES}

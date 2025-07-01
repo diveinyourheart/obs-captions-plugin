@@ -1,0 +1,3 @@
+[submodule "CI/http/CI_build/plibsys"]
+	path = CI/http/CI_build/plibsys
+	url = https://github.com/saprykin/plibsys.git

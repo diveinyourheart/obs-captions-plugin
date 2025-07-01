@@ -150,22 +150,39 @@ message("CMAKE_FRAMEWORK_PATH: ${CMAKE_FRAMEWORK_PATH}")
 message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 message("OBS_BUILD_DIR: ${OBS_BUILD_DIR}")
 
+#find_package(libobs REQUIRED
+#        PATHS
+#        ${OBS_BUILD_DIR}/Frameworks
+#        ${OBS_BUILD_DIR}/lib
+#        ${OBS_BUILD_DIR}
+#        NO_DEFAULT_PATH
+#        )
+
+message("${OBS_BUILD_DIR}")
+
 find_package(libobs REQUIRED
         PATHS
-        ${OBS_BUILD_DIR}/Frameworks
-        ${OBS_BUILD_DIR}/lib
-        ${OBS_BUILD_DIR}
+        ${OBS_BUILD_DIR}/libobs
         NO_DEFAULT_PATH
-        )
+)
+
 message("using libOBS: ${libobs_DIR}")
+
+#find_package(obs-frontend-api REQUIRED
+#        CONFIG
+#        PATHS
+#        ${OBS_BUILD_DIR}
+#        ${OBS_BUILD_DIR}/lib
+#        NO_DEFAULT_PATH
+#        )
 
 find_package(obs-frontend-api REQUIRED
         CONFIG
         PATHS
-        ${OBS_BUILD_DIR}
-        ${OBS_BUILD_DIR}/lib
+        ${OBS_BUILD_DIR}/frontend/api
         NO_DEFAULT_PATH
-        )
+)
+
 message("using obs_frontend_library: ${obs-frontend-api_DIR}")
 
 if (APPLE)

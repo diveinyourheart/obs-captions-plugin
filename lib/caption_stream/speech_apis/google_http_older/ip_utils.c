@@ -31,6 +31,7 @@ static const char* host_to_ip(const char* hostname) {
 
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <secure/_string.h>
 
 static const char* host_to_ip(const char* hostname) {
 	struct hostent* hp = gethostbyname(hostname);

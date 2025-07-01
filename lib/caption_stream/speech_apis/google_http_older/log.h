@@ -8,20 +8,21 @@
 #include <time.h>
 #include <string.h>
 
-#endif // __OBJC__
+#endif
 
-static inline char *timenow()
+// === auxiliar functions
+static inline char *timenow();
 
-#define _FILE strrchr(__FILE__,'/') ? strrchr(__FILE__,'/') + 1 : __FILE__
+#define _FILE strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__
 
-#define NO_LOG 0x00
-#define ERROR_LEVEL 0x01
-#define INFO_LEVEL 0x02
-#define DEBUG_LEVEL 0x03
+#define NO_LOG          0x00
+#define ERROR_LEVEL     0x01
+#define INFO_LEVEL      0x02
+#define DEBUG_LEVEL     0x03
 
 #ifndef LOG_LEVEL
-#define LOG_LEVEL DEBUG_LEVEL
-#endif // !LOG_LEVEL
+#define LOG_LEVEL   DEBUG_LEVEL
+#endif
 
 #ifdef __OBJC__
 
@@ -42,14 +43,14 @@ static inline char *timenow()
 #define PRINTFUNCTION(format, ...)      fprintf(stderr, format, __VA_ARGS__)
 #endif
 
-#define LO_FMT "%s | %-7s | %-15s | %s:%d | "
-#define LOG_ARGS(LOG_TAG) timenow(), LOG_TAG,, _FILE, __FUNCTION__, __LINE__
+#define LOG_FMT             "%s | %-7s | %-15s | %s:%d | "
+#define LOG_ARGS(LOG_TAG)   timenow(), LOG_TAG, _FILE, __FUNCTION__, __LINE__
 
-#define NEWLINE "\n"
+#define NEWLINE     "\n"
 
-#define ERROR_TAG "ERROR"
-#define INFO_TAG "INFO"
-#define DEBUG_TAG "DEBUG"
+#define ERROR_TAG   "ERROR"
+#define INFO_TAG    "INFO"
+#define DEBUG_TAG   "DEBUG"
 
 #if LOG_LEVEL >= DEBUG_LEVEL
 #define debug_log(message, ...)     PRINTFUNCTION(LOG_FMT message NEWLINE, LOG_ARGS(DEBUG_TAG), ##__VA_ARGS__)
@@ -75,17 +76,32 @@ static inline char *timenow()
 #define LOG_IF_ERROR(condition, message, ...)
 #endif
 
-static inline char* timenow() {
-	static char buffer[64];
-	time_t rawtime;
-	struct tm* timeinfo;
+static inline char *timenow() {
+    static char buffer[64];
+    time_t rawtime;
+    struct tm *timeinfo;
 
-	time(&rawtime);
-	timeinfo = localtime(&rowtime);
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
 
-	strftime(buffer, 64, "%Y-%m-%d %H:%M:%S", timeinfo);
+    strftime(buffer, 64, "%Y-%m-%d %H:%M:%S", timeinfo);
 
-	return buffer;
+    return buffer;
 }
 
-#endif // !__MACROLOGGER_H__
+#ifdef __OBJC__
+
+static inline void objc_print(NSString *format, ...) {
+    AUTORELEASEPOOL_BEGIN
+    va_list args;
+    va_start(args, format);
+    NSString *logStr = [[NSString alloc] initWithFormat:format arguments:args];
+    fprintf(stderr, "%s", [logStr UTF8String]);
+    RELEASE(logStr);
+    va_end(args);
+    AUTORELEASEPOOL_END
+}
+
+#endif
+
+#endif
