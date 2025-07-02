@@ -2,12 +2,14 @@ project(caption_stream)
 
 message("BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 
+set(SPEECH_API_GOOGLE_GRPC_V1 ON)
+
 if (SPEECH_API_GOOGLE_GRPC_V1 AND SPEECH_API_GOOGLE_HTTP_OLD)
     message(FATAL_ERROR "both SPEECH_API_GOOGLE_GRPC_V1 AND SPEECH_API_GOOGLE_HTTP_OLD given, nope")
 endif ()
 
-include_directories("thirdparty")
-include_directories(".")
+include_directories(thirdparty)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 if (SPEECH_API_GOOGLE_GRPC_V1)
     message("using SPEECH_API_GOOGLE_GRPC_V1!")
@@ -23,7 +25,7 @@ endif ()
 
 set(caption_stream_SOURCES
         utils.h
-        ContinuousCaptions.cpp
+#        ContinuousCaptions.cpp
 )
 
 set(caption_stream_HEADERS
@@ -31,7 +33,7 @@ set(caption_stream_HEADERS
         thirdparty/cameron314/blockingconcurrentqueue.h
         utils.h
         CaptionResult.h
-        ContinuousCaptions.h
+#        ContinuousCaptions.h
 )
 
 add_library(caption_stream STATIC

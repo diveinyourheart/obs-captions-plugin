@@ -9,6 +9,7 @@
 #include <queue>
 #include <chrono>
 #include <mutex>
+#include <atomic>
 #include "cameron314/blockingconcurrentqueue.h"
 #include "ThreadsaferCallback.h"
 #include "CaptionResult.h"
@@ -89,13 +90,13 @@ class CaptionStream :public std::enable_shared_from_this<CaptionStream> {
 
 	moodycamel::BlockingConcurrentQueue<string*> audio_queue;
 
-	bool started = false;
-	bool stopped = false;
+	std::atomic<bool> started = atomic<bool>(false);
+	std::atomic<bool> stopped = atomic<bool>(false);
 
 	string* dequeue_audio_data(const std::int64_t timeout_us);
-	void upstream_run(std::shared_ptr<CaptionStream> self);
-	void _upstream_run(std::shared_ptr<CaptionStream> self);
-	void downstream_run(std::shared_ptr<CaptionStream> self);
+	void upstream_run(const std::shared_ptr<CaptionStream> &self);
+	void _upstream_run(const std::shared_ptr<CaptionStream> &self);
+	void downstream_run(const std::shared_ptr<CaptionStream> &self);
 	void _downstream_run();
 public:
 	ThreadsaferCallback<caption_text_callback> on_caption_cb_handle;
@@ -108,9 +109,9 @@ public:
 
 	bool is_connected();
 
-	bool is_started();
+	bool is_started() const;
 
-	bool is_stopped();
+	bool is_stopped() const;
 
 	bool queue_audio_data(const char* data, const uint data_size);
 

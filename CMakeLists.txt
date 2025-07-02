@@ -1,21 +1,7 @@
-cmake_minimum_required(VERSION 3.12)
-project(obs_google_caption_plugin)
+cmake_minimum_required(VERSION 3.28...3.30)
 
 set(CMAKE_CXX_STANDARD 17)
 set(VERSION_STRING "0.30")
-
-set(OBS_BUILD_DIR "${CMAKE_SOURCE_DIR}/build_macos" CACHE STRING "Path containing obs and obs-fronted-api libs" FORCE)
-set(OBS_DEPS_DIR "" CACHE STRING "Path to OBS deps and Qt deps")
-
-message("OBS_BUILD_DIR: ${OBS_BUILD_DIR}")
-message("OBS_DEPS_DIR: ${OBS_DEPS_DIR}")
-
-IF (WIN32)
-    set(CMAKE_PREFIX_PATH "${OBS_BUILD_DIR};${OBS_DEPS_DIR};${CMAKE_PREFIX_PATH}")
-else ()
-    # add UI to be able to build from non installed build dir directly during dev
-    set(CMAKE_PREFIX_PATH "${OBS_BUILD_DIR};${OBS_BUILD_DIR}/UI;${OBS_DEPS_DIR};${CMAKE_PREFIX_PATH}")
-endif ()
 
 set(DEVMODE OFF)
 if (USE_DEVMODE)
@@ -42,10 +28,6 @@ endif ()
 
 add_compile_definitions(VERSION_STRING="${VERSION_STRING}")
 
-if (NOT OBS_BUILD_DIR)
-    message(FATAL_ERROR "OBS_BUILD_DIR not set")
-endif ()
-
 add_subdirectory(lib/caption_stream)
 
 if (DEVMODE)
@@ -67,32 +49,32 @@ include_directories(${OBS_SOURCE_DIR}/libobs)
 include_directories(${OBS_SOURCE_DIR}/UI/obs-frontend-api/)
 
 set(obs_google_caption_plugin_SOURCES
-        src/ui/MainCaptionWidget.cpp
-        src/ui/CaptionSettingsWidget.cpp
-
-        src/SourceAudioCaptureSession.cpp
-        src/OutputAudioCaptureSession.cpp
+#        src/ui/MainCaptionWidget.cpp
+#        src/ui/CaptionSettingsWidget.cpp
+#
+#        src/SourceAudioCaptureSession.cpp
+#        src/OutputAudioCaptureSession.cpp
         src/SourceCaptioner.cpp
-        src/CaptionResultHandler.cpp
-
-        src/google_s2t_caption_plugin.cpp
-        src/CaptionPluginManager.cpp
-        src/ui/CaptionDock.cpp
-        src/ui/OpenCaptionSettingsWidget.cpp
+#        src/CaptionResultHandler.cpp
+#
+#        src/google_s2t_caption_plugin.cpp
+#        src/CaptionPluginManager.cpp
+#        src/ui/CaptionDock.cpp
+#        src/ui/OpenCaptionSettingsWidget.cpp
 )
 
 set(obs_google_caption_plugin_HEADERS
-        src/SourceAudioCaptureSession.h
-        src/OutputAudioCaptureSession.h
+#        src/SourceAudioCaptureSession.h
+#        src/OutputAudioCaptureSession.h
         src/SourceCaptioner.h
-        src/CaptionResultHandler.cpp
-
-        src/ui/MainCaptionWidget.h
-        src/ui/CaptionSettingsWidget.h
-        src/caption_output_writer.h
-        src/CaptionPluginManager.h
-        src/ui/CaptionDock.h
-        src/ui/OpenCaptionSettingsWidget.h
+#        src/CaptionResultHandler.cpp
+#
+#        src/ui/MainCaptionWidget.h
+#        src/ui/CaptionSettingsWidget.h
+#        src/caption_output_writer.h
+#        src/CaptionPluginManager.h
+#        src/ui/CaptionDock.h
+#        src/ui/OpenCaptionSettingsWidget.h
 )
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -118,83 +100,13 @@ add_library(obs_google_caption_plugin MODULE
         ${obs_google_caption_plugin_SOURCES}
         ${obs_QRC_SOURCES}
 )
-
-if (WIN32 AND NOT BUILD_SHARED_LIBS)
-    message(BUILD_SHARED_LIBS: setting win flags)
-    #        set_property(TARGET obs_google_caption_plugin PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
-    foreach (flag_var
-            CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
-            CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
-            CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-            CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-
-        if (${flag_var} MATCHES "/MD")
-            message("before: ${flag_var}: " ${${flag_var}}" ")
-            string(REGEX REPLACE " /MD" "/MT" ${flag_var} "${${flag_var}}")
-            message("after : ${flag_var}: " ${${flag_var}}" ")
-        endif ()
-    endforeach ()
-endif ()
+add_library(OBS::obs_google_caption_plugin ALIAS obs_google_caption_plugin)
 
 if (PLUGIN_COMPILE_DEFINITIONS)
     #    message(" PLUGIN_COMPILE_DEFINITIONS ${PLUGIN_COMPILE_DEFINITIONS}")
     target_compile_definitions(obs_google_caption_plugin PRIVATE ${PLUGIN_COMPILE_DEFINITIONS})
 endif ()
 
-install(TARGETS obs_google_caption_plugin DESTINATION lib)
+target_link_libraries(obs_google_caption_plugin PRIVATE caption_stream ${_qt_widgets} OBS::libobs OBS::frontend-api)
 
-#message("CMAKE_FRAMEWORK_PATH: ${CMAKE_FRAMEWORK_PATH}")
-#set(CMAKE_FRAMEWORK_PATH "${OBS_BUILD_DIR}/Frameworks")
-set(CMAKE_FRAMEWORK_PATH "${CMAKE_FRAMEWORK_PATH};${OBS_BUILD_DIR}/Frameworks")
-message("CMAKE_FRAMEWORK_PATH: ${CMAKE_FRAMEWORK_PATH}")
-message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-message("OBS_BUILD_DIR: ${OBS_BUILD_DIR}")
-
-#find_package(libobs REQUIRED
-#        PATHS
-#        ${OBS_BUILD_DIR}/Frameworks
-#        ${OBS_BUILD_DIR}/lib
-#        ${OBS_BUILD_DIR}
-#        NO_DEFAULT_PATH
-#)
-
-find_package(libobs REQUIRED
-        PATHS
-        ${OBS_BUILD_DIR}/libobs
-        NO_DEFAULT_PATH
-)
-
-message("using libOBS: ${libobs_DIR}")
-
-#find_package(obs-frontend-api REQUIRED
-#        CONFIG
-#        PATHS
-#        ${OBS_BUILD_DIR}
-#        ${OBS_BUILD_DIR}/lib
-#        NO_DEFAULT_PATH
-#)
-
-find_package(obs-frontend-api REQUIRED
-        CONFIG
-        PATHS
-        ${OBS_BUILD_DIR}/frontend/api
-        NO_DEFAULT_PATH
-)
-
-message("using obs_frontend_library: ${obs-frontend-api_DIR}")
-
-if (APPLE)
-    target_include_directories(obs_google_caption_plugin PRIVATE "${OBS_BUILD_DIR}/Frameworks/libobs.framework/Headers")
-endif ()
-
-target_link_libraries(obs_google_caption_plugin PRIVATE caption_stream ${_qt_widgets} OBS::libobs OBS::obs-frontend-api)
-
-
-#get_property(dirs TARGET obs_google_caption_plugin PROPERTY INCLUDE_DIRECTORIES)
-#foreach (dir ${dirs})
-#    message("dir='${dir}'")
-#endforeach ()
-#get_property(dirs2 TARGET obs_google_caption_plugin PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-#foreach (dir ${dirs2})
-#    message("dir2='${dir}'")
-#endforeach ()
+set_target_properties_obs(obs_google_caption_plugin PROPERTIES FOLDER plugins PREFIX "")
