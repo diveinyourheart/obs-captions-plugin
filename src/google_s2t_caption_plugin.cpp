@@ -4,6 +4,11 @@
 #include <obs-frontend-api.h>
 #include <obs-properties.h>
 
+#include "SourceCaptioner.h"
+
+#include <QAction>
+#include <QMessageBox>
+
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE("my-plugin","en-US")
 

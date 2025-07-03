@@ -1,13 +1,11 @@
-cmake_minimum_required(VERSION 3.28...3.30)
+cmake_minimum_required(VERSION 3.12)
 
 set(CMAKE_CXX_STANDARD 17)
 set(VERSION_STRING "0.30")
 
-set(DEVMODE OFF)
-if (USE_DEVMODE)
-    #    message(WARNING "building in DEVMODE mode")
-    set(DEVMODE ON)
-endif ()
+add_subdirectory(lib/caption_stream)
+add_library(obs_google_caption_plugin MODULE)
+add_library(OBS::obs_google_caption_plugin ALIAS obs_google_caption_plugin)
 
 set(ENABLE_CUSTOM_API_KEY OFF CACHE BOOL "set API key via settings UI field")
 set(GOOGLE_API_KEY "" CACHE STRING "google api key with speech API enabled")
@@ -25,28 +23,6 @@ elseif (GOOGLE_API_KEY)
 else ()
     message(FATAL_ERROR "no GOOGLE_API_KEY set and no ENABLE_CUSTOM_API_KEY=ON either")
 endif ()
-
-add_compile_definitions(VERSION_STRING="${VERSION_STRING}")
-
-add_subdirectory(lib/caption_stream)
-
-if (DEVMODE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wno-deprecated-declarations")
-    message("CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
-
-    target_compile_definitions(speech_api_stream PRIVATE GOOGLE="www.google.com" PORTUP=80 PORTDOWN=80)
-    #    target_compile_definitions(speech_api_stream PRIVATE GOOGLE="127.0.0.1" PORTUP=9125 PORTDOWN=9125)
-    message("using api: localhost")
-
-    add_compile_definitions(USE_DEVMODE=1)
-else ()
-    target_compile_definitions(speech_api_stream PRIVATE GOOGLE="www.google.com" PORTUP=80 PORTDOWN=80)
-    message("using api: google")
-endif ()
-
-add_compile_definitions(BUILD_CAPTIONS=1)
-include_directories(${OBS_SOURCE_DIR}/libobs)
-include_directories(${OBS_SOURCE_DIR}/UI/obs-frontend-api/)
 
 set(obs_google_caption_plugin_SOURCES
 #        src/ui/MainCaptionWidget.cpp
@@ -67,7 +43,7 @@ set(obs_google_caption_plugin_HEADERS
 #        src/SourceAudioCaptureSession.h
 #        src/OutputAudioCaptureSession.h
         src/SourceCaptioner.h
-#        src/CaptionResultHandler.cpp
+        #        src/CaptionResultHandler.cpp
 #
 #        src/ui/MainCaptionWidget.h
 #        src/ui/CaptionSettingsWidget.h
@@ -81,32 +57,22 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(obs_QRC src/resources/obs.qrc)
+#set(obs_QRC src/resources/obs.qrc)
 
 find_package(Qt6 COMPONENTS Widgets Core)
 IF (Qt6_FOUND)
     message("using Qt6: ${Qt6_DIR}")
-    qt_add_resources(obs_QRC_SOURCES ${obs_QRC})
+#    qt_add_resources(obs_QRC_SOURCES ${obs_QRC})
     set(_qt_widgets Qt6::Widgets)
-elseif ()
+else ()
     find_package(Qt5 REQUIRED COMPONENTS Widgets Core)
     message("using Qt5: ${Qt5_DIR}")
-    qt5_add_resources(obs_QRC_SOURCES ${obs_QRC})
+#    qt5_add_resources(obs_QRC_SOURCES ${obs_QRC})
     set(_qt_widgets Qt5::Widgets)
 ENDIF ()
 
-add_library(obs_google_caption_plugin MODULE
-        ${obs_google_caption_plugin_HEADERS}
-        ${obs_google_caption_plugin_SOURCES}
-        ${obs_QRC_SOURCES}
-)
-add_library(OBS::obs_google_caption_plugin ALIAS obs_google_caption_plugin)
-
-if (PLUGIN_COMPILE_DEFINITIONS)
-    #    message(" PLUGIN_COMPILE_DEFINITIONS ${PLUGIN_COMPILE_DEFINITIONS}")
-    target_compile_definitions(obs_google_caption_plugin PRIVATE ${PLUGIN_COMPILE_DEFINITIONS})
-endif ()
-
+target_sources(obs_google_caption_plugin PRIVATE ${obs_google_caption_plugin_SOURCES} ${obs_google_caption_plugin_HEADERS})
+target_include_directories(obs_google_caption_plugin PUBLIC ${OBS_SOURCE_DIR}/libobs ${OBS_SOURCE_DIR}/UI/obs-frontend-api)
 target_link_libraries(obs_google_caption_plugin PRIVATE caption_stream ${_qt_widgets} OBS::libobs OBS::frontend-api)
 
 set_target_properties_obs(obs_google_caption_plugin PROPERTIES FOLDER plugins PREFIX "")

@@ -1,4 +1,7 @@
-project(caption_stream)
+cmake_minimum_required(VERSION 3.12)
+
+add_library(speech_api_stream SHARED)
+add_library(OBS::speech_api_stream ALIAS speech_api_stream)
 
 set(USE_PKG_CONFIG_GRPC "" CACHE BOOL "Use pkgconfig to automatically find grpc and ")
 set(GOOGLEAPIS_DIR "/Users/bytedance/develop/googleapis" CACHE STRING "Path containing grpc generated googleapis files")
@@ -34,38 +37,6 @@ else ()
     SET(GRPC_NAME gRPC::grpc++)
 endif ()
 
-if (WIN32 AND NOT BUILD_SHARED_LIBS)
-    message(BUILD_SHARED_LIBS: setting win flags)
-    foreach (flag_var
-            CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
-            CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
-            CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-            CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-
-        if (${flag_var} MATCHES "/MD")
-            message("before: ${flag_var}: " ${${flag_var}}"")
-            string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-            message("after : ${flag_var}: " ${${flag_var}}"")
-        endif ()
-    endforeach ()
-endif ()
-
-#if (BUILD_SHARED_LIB)
-#    #PEECH_API_COPY_LIBRARY_FILES PARENT to provide list of required dlls/dylibs to copy to bin?
-#    IF (APPLE)
-#
-#    elseif (WIN32)
-#    else ()
-#        message(FATAL_ERROR "unsupported platform")
-#    endif ()
-#endif ()
-
-
-if (WIN32)
-    set(PLATFORM_LINK_LIBRARIES ws2_32)
-    SET(SPEECH_API_TARGET_COMPILE_DEFINITIONS_PRIVATE _WIN32_WINNT=0x0600)
-endif ()
-
 if (GOOGLEAPIS_DIR)
     # check if the main cloud speech file exists to check if the given dir is correct
     set(_SPEECH_FILE "google/cloud/speech/v1/cloud_speech.grpc.pb.h")
@@ -81,13 +52,7 @@ else ()
 endif ()
 
 message("using GOOGLEAPIS_PATH: ${GOOGLEAPIS_PATH}")
-include_directories(${GOOGLEAPIS_PATH})
 
-
-#file(GLOB_RECURSE GOOGLE_TYPE ${GOOGLEAPIS_PATH}/google/type/*.cc)
-#file(GLOB_RECURSE GOOGLE_LOGGING ${GOOGLEAPIS_PATH}/google/logging/*.cc)
-#file(GLOB_RECURSE GOOGLE_API ${GOOGLEAPIS_PATH}/google/api/*.cc)
-#file(GLOB_RECURSE GOOGLE_API ${GOOGLEAPIS_PATH}/google/api/*.cc)
 file(GLOB_RECURSE GOOGLE_API
         ${GOOGLEAPIS_PATH}/google/api/http*.cc
         ${GOOGLEAPIS_PATH}/google/api/field_behavior*.cc
@@ -140,20 +105,11 @@ set(SPEECH_API_SOURCES
         ${GOOGLE_API_FILES}
 )
 
-add_library(speech_api_stream STATIC
-        ${SPEECH_API_SOURCES}
-)
 
-if (UNIX AND NOT APPLE)
-    target_compile_options(speech_api_stream PRIVATE "-fPIC")
-endif ()
-
+target_sources(speech_api_stream PRIVATE ${SPEECH_API_SOURCES})
 target_include_directories(speech_api_stream PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(speech_api_stream PRIVATE ${Protobuf_INCLUDE_DIRS})
+target_include_directories(speech_api_stream PUBLIC ${GOOGLEAPIS_PATH})
 
 target_link_libraries(speech_api_stream PRIVATE ${GRPC_NAME})
 target_link_libraries(speech_api_stream PUBLIC ${PLATFORM_LINK_LIBRARIES})
-
-target_compile_definitions(speech_api_stream PRIVATE
-        ${SPEECH_API_COMPILE_DEFINITIONS}
-        ${SPEECH_API_TARGET_COMPILE_DEFINITIONS_PRIVATE})
