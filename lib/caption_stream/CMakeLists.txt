@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
-
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
 
 set(SPEECH_API_GOOGLE_GRPC_V1 ON)
 
@@ -10,7 +11,7 @@ endif ()
 
 if (SPEECH_API_GOOGLE_GRPC_V1)
     message("using SPEECH_API_GOOGLE_GRPC_V1!")
-    add_subdirectory(speech_apis/grpc_speech_api)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/speech_apis/grpc_speech_api)
 elseif (SPEECH_API_GOOGLE_HTTP_OLD)
     message("using SPEECH_API_GOOGLE_HTTP_OLD!")
     add_subdirectory(speech_apis/google_http_older)
@@ -20,8 +21,7 @@ else ()
     #    message(FATAL_ERROR "either SPEECH_API_GOOGLE_GRPC_V1 or SPEECH_API_GOOGLE_HTTP_OLD required")
 endif ()
 
-add_library(caption_stream SHARED
-        ContinuousCaptions.cpp)
+add_library(caption_stream SHARED)
 add_library(OBS::caption_stream ALIAS caption_stream)
 
 set(caption_stream_SOURCES
@@ -43,5 +43,5 @@ target_sources(caption_stream PRIVATE
         ${caption_stream_HEADERS})
 target_include_directories(caption_stream PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(caption_stream PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
-target_include_directories(caption_stream PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}speech_apis/grpc_speech_api)
-target_link_libraries(caption_stream speech_api_stream)
+target_include_directories(caption_stream PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/speech_apis/grpc_speech_api)
+target_link_libraries(caption_stream PRIVATE speech_api_stream)
