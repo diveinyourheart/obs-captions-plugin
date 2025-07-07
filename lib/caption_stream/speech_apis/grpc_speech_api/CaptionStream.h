@@ -94,15 +94,15 @@ public:
     const CaptionStreamSettings settings;
     ThreadsaferCallback<caption_text_callback> on_caption_cb_handle;
 
-    CaptionStream(
-            const CaptionStreamSettings settings
+    explicit CaptionStream(
+            const CaptionStreamSettings &settings
     );
 
-    bool start(std::shared_ptr<CaptionStream> self);
+    bool start();
 
     void stop();
 
-    bool is_stopped();
+    bool is_stopped() const;
 
     bool queue_audio_data(const char *data, const uint data_size);
 

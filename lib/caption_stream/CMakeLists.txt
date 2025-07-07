@@ -21,7 +21,8 @@ else ()
     #    message(FATAL_ERROR "either SPEECH_API_GOOGLE_GRPC_V1 or SPEECH_API_GOOGLE_HTTP_OLD required")
 endif ()
 
-add_library(caption_stream SHARED)
+add_library(caption_stream SHARED
+        log.h)
 add_library(OBS::caption_stream ALIAS caption_stream)
 
 set(caption_stream_SOURCES
