@@ -104,9 +104,9 @@ public:
 
     bool is_stopped() const;
 
-    bool queue_audio_data(const char *data, const uint data_size);
+    bool queue_audio_data(const char *data, uint data_size);
 
-    string *dequeue_audio_data(const std::int64_t timeout_us);
+    string *dequeue_audio_data(std::int64_t timeout_us);
 
     ~CaptionStream();
 };

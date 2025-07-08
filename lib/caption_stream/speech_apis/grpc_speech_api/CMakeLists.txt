@@ -52,7 +52,6 @@ else ()
 endif ()
 
 message("using GOOGLEAPIS_PATH: ${GOOGLEAPIS_PATH}")
-include_directories(${GOOGLEAPIS_PATH})
 
 file(GLOB_RECURSE GOOGLE_API
         ${GOOGLEAPIS_PATH}/google/api/http*.cc

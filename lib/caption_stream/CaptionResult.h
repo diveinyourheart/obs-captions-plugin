@@ -3,6 +3,7 @@
 
 #ifndef _CHRONO_
 #include <chrono>
+#include <utility>
 #endif // !_CHRONO_
 
 
@@ -37,7 +38,7 @@ struct CaptionResult {
 	std::chrono::steady_clock::time_point first_received_at;
 	std::chrono::steady_clock::time_point received_at;
 
-	CaptionResult() {};
+	CaptionResult() = default;
 
 	CaptionResult(
 		int index,
@@ -51,8 +52,8 @@ struct CaptionResult {
 		index(index),
 		final(final),
 		stability(stability),
-		caption_text(caption_text),
-		raw_message(raw_message),
+		caption_text(std::move(caption_text)),
+		raw_message(std::move(raw_message)),
 		first_received_at(first_received_at),
 		received_at(received_at) {
 	}
