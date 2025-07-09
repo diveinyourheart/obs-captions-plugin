@@ -4,5 +4,6 @@
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/CI/http/CI_build/plibsys" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/caption_stream/speech_apis/google_http_older/thirdparty/plibsys" vcs="Git" />
   </component>
 </project>
