@@ -8,6 +8,11 @@
 
 #include <QAction>
 #include <QMessageBox>
+#include <QMainWindow>
+#include <media-io/audio-resampler.h>
+#include <fstream>
+#include <thread>
+
 
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE("my-plugin","en-US")
@@ -41,10 +46,10 @@ static void obs_event(enum obs_frontend_event event, void*) {
 		stream_stopped_event()
 	}
 	else if (event == OBS_FRONTEND_EVENT_RECORDING_STARTED) {
-		recording_started_event
+		recording_started_event()
 	}
 	else if (event == OBS_FRONTEND_EVENT_RECORDING_STOPPED) {
-		recording_started_event
+		recording_started_event()
 	}
 	else if (event == OBS_FRONTEND_EVENT_VIRTUALCAM_STARTED) {
 		virtualcam_started_event();

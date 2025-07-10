@@ -1,0 +1,8 @@
+//
+// Created by ByteDance on 25-7-10.
+//
+
+#ifndef CAPTIONRESULTHANDLER_H
+#define CAPTIONRESULTHANDLER_H
+
+#endif //CAPTIONRESULTHANDLER_H

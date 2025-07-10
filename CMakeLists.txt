@@ -67,10 +67,10 @@ include_directories(${OBS_SOURCE_DIR}/libobs)
 include_directories(${OBS_SOURCE_DIR}/UI/obs-frontend-api/)
 
 set(obs_google_caption_plugin_SOURCES
-#        src/ui/MainCaptionWidget.cpp
+        src/ui/MainCaptionWidget.cpp
+        src/SourceAudioCaptureSession.cpp
+        src/log.c
 #        src/ui/CaptionSettingsWidget.cpp
-#
-#        src/SourceAudioCaptureSession.cpp
 #        src/OutputAudioCaptureSession.cpp
         src/SourceCaptioner.cpp
 #        src/CaptionResultHandler.cpp
@@ -82,13 +82,13 @@ set(obs_google_caption_plugin_SOURCES
 )
 
 set(obs_google_caption_plugin_HEADERS
-#        src/SourceAudioCaptureSession.h
-#        src/OutputAudioCaptureSession.h
         src/SourceCaptioner.h
-#        src/CaptionResultHandler.cpp
-#
-#        src/ui/MainCaptionWidget.h
-#        src/ui/CaptionSettingsWidget.h
+        src/ui/MainCaptionWidget.h
+        src/SourceAudioCaptureSession.h
+        src/OutputAudioCaptureSession.h
+        src/CaptionResultHandler.h
+        src/data.h
+        #        src/ui/CaptionSettingsWidget.h
 #        src/caption_output_writer.h
 #        src/CaptionPluginManager.h
 #        src/ui/CaptionDock.h
@@ -106,7 +106,7 @@ IF (Qt6_FOUND)
     message("using Qt6: ${Qt6_DIR}")
     qt_add_resources(obs_QRC_SOURCES ${obs_QRC})
     set(_qt_widgets Qt6::Widgets)
-elseif ()
+else()
     find_package(Qt5 REQUIRED COMPONENTS Widgets Core)
     message("using Qt5: ${Qt5_DIR}")
     qt5_add_resources(obs_QRC_SOURCES ${obs_QRC})

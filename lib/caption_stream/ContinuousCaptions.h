@@ -69,9 +69,9 @@ class ContinuousCaptions {
     public:
     ThreadsaferCallback<continuous_caption_text_callback> on_caption_cb_handle;
 
-    ContinuousCaptions(ContinuousCaptionStreamSettings &settings);
+    explicit ContinuousCaptions(ContinuousCaptionStreamSettings &settings);
 
-    bool queue_audio_data(const char* data, const uint data_size);
+    bool queue_audio_data(const char* data, uint data_size);
 
     ~ContinuousCaptions();
 };
