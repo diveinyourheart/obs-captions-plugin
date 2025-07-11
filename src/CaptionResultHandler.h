@@ -1,8 +1,9 @@
-//
-// Created by ByteDance on 25-7-10.
-//
+#ifndef CPPTESTING_CAPTIONRESULTHANDLER_H
+#define CPPTESTING_CAPTIONRESULTHANDLER_H
 
-#ifndef CAPTIONRESULTHANDLER_H
-#define CAPTIONRESULTHANDLER_H
+#include <utility>
+#include <string>
+#include <CaptionStream.h>
+#include
 
-#endif //CAPTIONRESULTHANDLER_H
+#endif //CPPTESTING_CAPTIONRESULTHANDLER_H

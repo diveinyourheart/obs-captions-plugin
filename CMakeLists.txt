@@ -64,16 +64,16 @@ endif ()
 
 add_compile_definitions(BUILD_CAPTIONS=1)
 include_directories(${OBS_SOURCE_DIR}/libobs)
-include_directories(${OBS_SOURCE_DIR}/UI/obs-frontend-api/)
+include_directories(${OBS_SOURCE_DIR}/frontend/api)
 
 set(obs_google_caption_plugin_SOURCES
         src/ui/MainCaptionWidget.cpp
         src/SourceAudioCaptureSession.cpp
         src/log.c
 #        src/ui/CaptionSettingsWidget.cpp
-#        src/OutputAudioCaptureSession.cpp
+        src/OutputAudioCaptureSession.cpp
         src/SourceCaptioner.cpp
-#        src/CaptionResultHandler.cpp
+        src/CaptionResultHandler.cpp
 
         src/google_s2t_caption_plugin.cpp
 #        src/CaptionPluginManager.cpp
@@ -88,6 +88,7 @@ set(obs_google_caption_plugin_HEADERS
         src/OutputAudioCaptureSession.h
         src/CaptionResultHandler.h
         src/data.h
+        src/WordReplacer.h
         #        src/ui/CaptionSettingsWidget.h
 #        src/caption_output_writer.h
 #        src/CaptionPluginManager.h
