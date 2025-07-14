@@ -8,19 +8,19 @@
 
 using namespace std;
 
-class WordReplaxement {
+class WordReplacement {
 private:
     string type;
     string from;
     string to;
 public:
-    WordReplaxement (const string &type, const string &from, const string &to) : type(type), from(from), to(to) {}
+    WordReplacement (const string &type, const string &from, const string &to) : type(type), from(from), to(to) {}
 
-    bool operator==(const WordReplaxement &other) const {
+    bool operator==(const WordReplacement &other) const {
         return type == other.type && from == other.from && to == other.to;
     }
 
-    bool operator!=(const WordReplaxement &other) const {
+    bool operator!=(const WordReplacement &other) const {
         return !(*this == other);
     }
 
@@ -65,7 +65,7 @@ class Rep {
 class Replacer {
     std::vector<Rep> regs;
     public:
-    Replacer(const vector<WordReplaxement> &replacements, bool ignore_invalid) {
+    Replacer(const vector<WordReplacement> &replacements, bool ignore_invalid) {
         addReps(replacements, ignore_invalid);
     }
 
@@ -82,10 +82,10 @@ class Replacer {
     }
 
     private:
-    void set_replacements(const vector<WordReplaxement> &replacements, bool ignore_invalid) {
+    void set_replacements(const vector<WordReplacement> &replacements, bool ignore_invalid) {
         addReps(replacements, ignore_invalid);
     }
-    void addReps(const vector<WordReplaxement> &replacements, bool ignore_invalid) {
+    void addReps(const vector<WordReplacement> &replacements, bool ignore_invalid) {
         for (auto &rep : replacements) {
             if (rep.from.empty())
                 continue;
@@ -109,7 +109,7 @@ class Replacer {
         }
     }
 
-    void addRepsRegex(const vector<WordReplaxement> &replacements, bool ignore_invalid) {
+    void addRepsRegex(const vector<WordReplacement> &replacements, bool ignore_invalid) {
         std::regex escape_reg(R"([/|[\]{}()\\^$*+?.])");
 
         for (auto &rep : replacements) {
@@ -135,5 +135,29 @@ class Replacer {
         }
     }
 };
+
+static std::vector<WordReplacement> wordRepsFromStrs(const string &type, const std::vector<string> &strings) {
+    auto words = std::vector<WordReplacement>();
+    for (auto &str : strings) {
+        if (str.empty())
+            continue;
+        words.emplace_back(type,str,"");
+    }
+    return words;
+}
+
+static vector<WordReplacement> combineWordReps(
+    const vector<WordReplacement> &manualReplacements,
+    const vector<WordReplacement> &defaultReplacements
+    ) {
+    auto reps = vector<WordReplacement>();
+    for (const auto&i : defaultReplacements) {
+        reps.push_back(i);
+    }
+    for (const auto&i : manualReplacements) {
+        reps.push_back(i);
+    }
+    return reps;
+}
 
 #endif //OBS_GOOGLE_CAPTION_PLUGIN_WORDREPLACER_H

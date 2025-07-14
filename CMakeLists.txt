@@ -89,6 +89,7 @@ set(obs_google_caption_plugin_HEADERS
         src/CaptionResultHandler.h
         src/data.h
         src/WordReplacer.h
+        src/stringutils.h
         #        src/ui/CaptionSettingsWidget.h
 #        src/caption_output_writer.h
 #        src/CaptionPluginManager.h
