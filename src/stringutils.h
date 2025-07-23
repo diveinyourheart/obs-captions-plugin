@@ -133,7 +133,7 @@ static void split_into_lines(vector<string> &out_lines, const string &text, cons
 static void join_strings(const vector<string> &lines, const string &joiner, string &output) {
     for (const string &line : lines) {
         if (!output.empty())
-            output += " ";
+            output.append(joiner);
         output += line;
     }
 }

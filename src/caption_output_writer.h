@@ -51,7 +51,7 @@ static void caption_output_writer_loop(shared_ptr<CaptionOutputControl<int>> con
             continue;
         }
 
-        if (!caption_output.output_result->output_line == previous_line) {
+        if (caption_output.output_result->output_line == previous_line) {
             debug_log("ignoring duplicate %s line: %s",to_what.c_str(),previous_line.c_str());
             continue;
         }
