@@ -529,4 +529,161 @@ void write_transcript_caption_simple(std::fstream &fs,
     fs_write_string(fs,comb.str());
 }
 
+void write_loop_txt(SrtState &settings, std::fstream &fs,const std::chrono::steady_clock::time_point &started_at_steady,
+    shared_ptr<CaptionOutputControl<TranscriptOutputSettings>> control,const bool add_timestamps, const bool add_spacer) {
+    std::shared_ptr<OutputCaptionResult> held_nonfinal_result;
+    CaptionOutput caption_output;
+    const string prefix(add_spacer?"    ":"");
+
+    while (!control->stop) {
+        control->caption_queue.wait_dequeue(caption_output);
+
+        if (control->stop) {
+            break;
+        }
+
+        if (!caption_output.output_result || caption_output.is_clearance) {
+            continue;
+        }
+
+        held_nonfinal_result = nullptr;
+
+        if (!relevant_result(settings, caption_output))
+            continue;
+
+        if (caption_output.output_result->caption_result.final) {
+            write_transcript_caption_simple(fs,prefix,started_at_steady,*caption_output.output_result,add_timestamps);
+            if (fs.fail()) {
+                error_log("transcript_writer_loop_txt error, write failed: '%s'", strerror(errno));
+                return;
+            }
+        }else {
+            held_nonfinal_result=caption_output.output_result;
+        }
+    }
+
+    if (held_nonfinal_result) {
+        write_transcript_caption_simple(fs, prefix, started_at_steady, *held_nonfinal_result, add_timestamps);
+        if (fs.fail()) {
+            error_log("transcript_writer_loop_txt error, write failed: '%s'", strerror(errno));
+            return;
+        }
+    }
+
+    held_nonfinal_result=nullptr;
+}
+
+void write_loop_raw(std::fstream &fs,const std::chrono::steady_clock::time_point &started_at_steady,
+    shared_ptr<CaptionOutputControl<TranscriptOutputSettings>> control) {
+    CaptionOutput caption_output;
+    while (!control->stop) {
+        control->caption_queue.wait_dequeue(caption_output);
+        if (control->stop) {
+            break;
+        }
+        if (!caption_output.output_result || caption_output.is_clearance) {
+            continue;
+        }
+
+        string prefix;
+        if (caption_output.output_result->interrupted && caption_output.output_result->caption_result.final)
+            prefix = "IF    ";
+        else if (caption_output.output_result->interrupted)
+            prefix = "I     ";
+        else if (caption_output.output_result->caption_result.final)
+            prefix = "F     ";
+        else
+            prefix = "      ";
+        write_transcript_caption_simple(fs,prefix,started_at_steady,*caption_output.output_result,true);
+        if (fs.fail()) {
+            error_log("transcript_writer_loop_raw error, write failed: '%s'", strerror(errno));
+            return;
+        }
+    }
+}
+
+void transcript_writer_loop(shared_ptr<CaptionOutputControl<TranscriptOutputSettings>> control,
+    const string target_name, const TranscriptOutputSettings transcript_settings) {
+    const string format = transcript_settings.format;
+    auto started_at_sys = std::chrono::system_clock::now();
+    auto started_at_steady = std::chrono::steady_clock::now();
+    const string to_what = target_name;
+
+    UseTranscriptSettings use_settings;
+    try {
+        use_settings = build_use_settings(transcript_settings,target_name);
+    }catch (string ex) {
+        error_log("transcript_writer_loop startup failed: %s %s", to_what.c_str(), ex.c_str());
+        return;
+    }catch (...) {
+        error_log("transcript_writer_loop startup failed: %s", to_what.c_str());
+        return;
+    }
+
+    if (format != "txt" && format != "text_plain" && format != "srt" && format != "raw") {
+        error_log("transcript_writer_loop %s error, invalid format: %s", to_what.c_str(), format.c_str());
+        return;
+    }
+
+    info_log("transcript_writer_loop %s starting, format: %s", to_what.c_str(), format.c_str());
+
+    QFileInfo output_directory(QString::fromStdString(control->arg.output_path));
+    if (!output_directory.exists()) {
+        error_log("transcript_writer_loop %s error, output dir not found: %s", to_what.c_str(), control->arg.output_path.c_str());
+        return;
+    }
+    if (!output_directory.isDir()) {
+        error_log("transcript_writer_loop %s error, output dir not a directory: %s", to_what.c_str(), control->arg.output_path.c_str());
+        return;
+    }
+
+    QString transcript_file;
+    bool overwrite_file = false;
+    try {
+        transcript_file = find_transcript_filename(transcript_settings,use_settings,output_directory,target_name,started_at_sys,100,overwrite_file)
+        .absoluteFilePath();
+        info_log("using transcript output file: '%s', overwrite existing: %d", transcript_file.toStdString().c_str(), overwrite_file);
+    }catch (string &err) {
+        error_log("transcript_writer_loop find_transcript_filename error: %s", err.c_str());
+        return;
+    }catch (...) {
+        error_log("transcript_writer_loop %s error, couldn't get an output filepath", to_what.c_str());
+        return;
+    }
+
+    try {
+        std::fstream fs;
+        fs.open(transcript_file.toStdString(),
+                    std::fstream::out | std::ios::binary | (overwrite_file?std::fstream::trunc : std::fstream::app));
+        if (fs.fail()) {
+            error_log("transcript_writer_loop %s error, couldn't open file", strerror(errno));
+            return;
+        }
+
+        const uint max_duration_secs = transcript_settings.srt_target_duration_secs ? transcript_settings.srt_target_duration_secs : 1;
+        SrtState settings = SrtState{started_at_steady, std::chrono::seconds(max_duration_secs),1,
+        transcript_settings.srt_target_line_length,
+        transcript_settings.srt_add_punctuation,
+        transcript_settings.srt_split_single_sentences,
+        transcript_settings.srt_capitalization,1250};
+        info_log("transcript_writer_loop starting write_loop: %s", format.c_str());
+        if (format == "raw")
+            write_loop_raw(fs,started_at_steady,control);
+        else if (format == "txt")
+            write_loop_txt(settings,fs,started_at_steady,control,true,true);
+        else if (format == "text_plain")
+            write_loop_txt(settings,fs,started_at_steady,control,false,false);
+        else
+            write_loop_srt(settings,fs,control);
+        fs.close();
+    }catch (std::exception &e) {
+        error_log("transcript_writer_loop %s error %s", to_what.c_str(), e.what());
+        return;
+    }catch (...) {
+        error_log("transcript_writer_loop %s error", to_what.c_str());
+        return;
+    }
+    info_log("transcript_writer_loop %s done", to_what.c_str());
+}
+
 #endif //OBS_GOOGLE_CAPTION_PLUGIN_CAPTION_TRANSCRIPT_WRITER_H

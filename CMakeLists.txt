@@ -76,7 +76,7 @@ set(obs_google_caption_plugin_SOURCES
         src/CaptionResultHandler.cpp
 
         src/google_s2t_caption_plugin.cpp
-#        src/CaptionPluginManager.cpp
+        src/CaptionPluginManager.cpp
 #        src/ui/CaptionDock.cpp
 #        src/ui/OpenCaptionSettingsWidget.cpp
 )
@@ -95,10 +95,11 @@ set(obs_google_caption_plugin_HEADERS
         src/ui/uiutils.h
         src/CaptionPluginManager.h
         src/CaptionPluginSettings.h
-        #        src/ui/CaptionSettingsWidget.h
-#        src/caption_output_writer.h
+        src/storage_utils.h
+        src/ui/CaptionSettingsWidget.h
+        src/ui/OpenCaptionSettingsWidget.h
+        #        src/caption_output_writer.h
 #        src/ui/CaptionDock.h
-#        src/ui/OpenCaptionSettingsWidget.h
 )
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

@@ -505,7 +505,87 @@ void SourceCaptioner::stream_started_event() {
         auto control_transcript = std::make_shared<CaptionOutputControl<TranscriptOutputSettings>>(cur_settings.transcript_settings);
         transcript_streaming_output.set_control(control_transcript);
 
-
+        std::thread th2(transcript_writer_loop,control_transcript,"stream",cur_settings.transcript_settings);
+        th2.detach();
     }
+}
+
+void SourceCaptioner::stream_stopped_event() {
+    streaming_output.clear();
+    transcript_streaming_output.clear();
+}
+
+void SourceCaptioner::recording_started_event() {
+    settings_change_mutex.lock();
+    SourceCaptionerSettings cur_settings = settings;
+    settings_change_mutex.unlock();
+
+    auto control_output = std::make_shared<CaptionOutputControl<int>>(0);
+    recording_output.set_control(control_output);
+    std::thread th(caption_output_writer_loop,control_output,false);
+    th.detach();
+
+    if (this->base_enabled && cur_settings.transcript_settings.enabled && cur_settings.transcript_settings.recording_transcripts_enabled) {
+        auto control_transcript = std::make_shared<CaptionOutputControl<TranscriptOutputSettings>>(cur_settings.transcript_settings);
+        transcript_recording_output.set_control(control_transcript);
+
+        std::thread th2(transcript_writer_loop,control_transcript,"recording",cur_settings.transcript_settings);
+        th2.detach();
+    }
+}
+
+void SourceCaptioner::recording_stopped_event() {
+    recording_output.clear();
+    transcript_recording_output.clear();
+}
+
+void SourceCaptioner::virtualcam_started_event() {
+    settings_change_mutex.lock();
+    SourceCaptionerSettings cur_settings = settings;
+    settings_change_mutex.unlock();
+
+    if (this->base_enabled && cur_settings.transcript_settings.enabled && cur_settings.transcript_settings.virtualcam_transcripts_enabled) {
+        auto control_transcript = std::make_shared<CaptionOutputControl<TranscriptOutputSettings>>(cur_settings.transcript_settings);
+        transcript_virtualcam_output.set_control(control_transcript);
+
+        std::thread th2(transcript_writer_loop, control_transcript, "virtualcam", cur_settings.transcript_settings);
+        th2.detach();
+    }
+}
+
+void SourceCaptioner::virtualcam_stopped_event() {
+    transcript_virtualcam_output.clear();
+}
+
+void SourceCaptioner::set_text_source_text(const string &text_source_name, const string &caption_text) {
+    if (std::get<0>(last_text_source_set) == caption_text && std::get<1>(last_text_source_set) == text_source_name) {
+        return;
+    }
+    ::set_text_source_text(text_source_name, caption_text);
+    last_text_source_set = std::tuple<string,string>(caption_text, text_source_name);
+}
+
+SourceCaptioner::~SourceCaptioner() {
+    stream_stopped_event();
+    recording_stopped_event();
+    stop_caption_stream(false);
+}
+
+template<typename T>
+void CaptionOutputControl<T>::stop_soon() {
+    debug_log("CaptionOutputControl stop_soon");
+    stop = true;
+    caption_queue.enqueue(CaptionOutput());
+}
+
+template<typename T>
+CaptionOutputControl<T>::~CaptionOutputControl() {
+    debug_log("~CaptionOutputControl");
+}
+
+bool TranscriptOutputSettings::hasBaseSettings() const {
+    if (!enabled || output_path.empty() ||format.empty())
+        return false;
+    return true;
 }
 

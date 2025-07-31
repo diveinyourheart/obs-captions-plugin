@@ -95,7 +95,7 @@ static void setup_combobox_capitalization(QComboBox &comboBox) {
 static string transcript_format_extension(const string &format,const string &fallback) {
     if (format == "raw")
         return "log";
-    if (format == "text" || format == "srt")
+    if (format == "txt" || format == "srt")
         return format;
     if (format == "txt_plain")
         return "txt";

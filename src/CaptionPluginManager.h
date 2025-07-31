@@ -28,7 +28,7 @@ class CaptionPluginManager : public QObject {
     CaptioningState state;
 
     private:
-    int update_counter = 0;
+    int update_count = 0;
 
     public:
     CaptionPluginManager(const CaptionPluginSettings& settings);
@@ -40,7 +40,7 @@ class CaptionPluginManager : public QObject {
 
     bool toggle_enabled();
 
-    CaptioningState captioning_state();
+    CaptioningState captioning_state() const;
 
     public slots:
 
