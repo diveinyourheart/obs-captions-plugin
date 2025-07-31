@@ -74,7 +74,7 @@ class OpenCaptionSettingsList : public QWidget {
 private:
     std::vector<OpenCaptionSettingsWidget> widgets;
 public:
-    OpenCaptionSettingsList(QWidget *parent) : QWidget(parent) {
+    explicit OpenCaptionSettingsList(QWidget *parent) : QWidget(parent) {
         auto layout = new QVBoxLayout(this);
         layout->setAlignment(Qt::AlignTop);
         auto button = new QPushButton("Add Text Output");
